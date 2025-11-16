@@ -67,7 +67,7 @@ async def websocket_endpoint(websocket: WebSocket):
 
             await manager.broadcast(data)
             previous_temp = temperature
-            await asyncio.sleep(2)
+            await asyncio.sleep(10)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
