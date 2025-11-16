@@ -45,6 +45,10 @@ async def websocket_endpoint(websocket: WebSocket):
 
     try:
         while True:
+
+            # 🔵 Send ping to keep Render from sleeping
+            await websocket.send_json({"ping": True})
+
             # Random fluctuation around previous temp
             temperature = round(previous_temp + random.uniform(-0.7, 0.7), 2)
             humidity = round(random.uniform(40, 55), 2)
@@ -52,9 +56,8 @@ async def websocket_endpoint(websocket: WebSocket):
             voltage = round(random.uniform(228, 232), 1)
             fan_speed = random.randint(1200, 1500)
 
-            # Detect sudden temperature drop (>1°C)
             temp_drop = previous_temp - temperature
-            door_opened = temp_drop > 1.0  # simulate alarm condition
+            door_opened = temp_drop > 1.0
 
             data = {
                 "temperature": temperature,
@@ -67,9 +70,12 @@ async def websocket_endpoint(websocket: WebSocket):
 
             await manager.broadcast(data)
             previous_temp = temperature
-            await asyncio.sleep(10)
+
+            await asyncio.sleep(2)
+
     except WebSocketDisconnect:
         manager.disconnect(websocket)
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
